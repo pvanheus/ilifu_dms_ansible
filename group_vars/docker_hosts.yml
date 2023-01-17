@@ -1,0 +1,7 @@
+---
+swap_file_size_mb: '15258'
+certbot_install_method: snap
+certbot_create_if_missing: true
+certbot_admin_email: pvanheusden@uwc.ac.za
+network_mtu: 1450
+dms_user: ubuntu

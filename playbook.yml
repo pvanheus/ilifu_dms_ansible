@@ -1,0 +1,28 @@
+---
+- hosts: docker_hosts
+  become: yes
+  roles:
+    - name: docker
+      tags:
+        - docker
+    - name: geerlingguy-swap
+      tags:
+        - swap
+    - name: geerlingguy-letsencrypt
+      tags:
+        - ssl
+    - name: dms
+      tags:
+        - dms
+# todo: network config
+# docker swarm init
+# docker network rm ingress
+# docker network rm docker_gwbridge
+# docker network rm dms-swarm-network
+# docker network create --opt com.docker.network.driver.mtu=1450 --scope swarm --driver overlay --attachable dms-swarm-network
+# docker network create --opt com.docker.network.driver.mtu=1450 --scope local --driver bridge docker_gwbridge
+# docker network create --opt com.docker.network.driver.mtu=1450 --scope swarm --driver overlay ingress
+# docker swarm leave --force
+# docker swarm init
+# you can check the MTU with docker network inspect
+#

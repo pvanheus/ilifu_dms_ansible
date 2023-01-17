@@ -1,0 +1,63 @@
+---
+-  name: Install DMS script
+   get_url:
+     dest: /usr/local/bin/dms
+     mode: 0755
+     url: "https://raw.githubusercontent.com/overture-stack/dms/{{dms_version}}/src/main/bin/dms-docker"
+
+- name: Install jq
+  package:
+    name: jq
+    state: present
+
+# the network config (to set the MTU to 1450) is:
+# docker network rm docker_gwbridge
+# docker network create --opt com.docker.network.driver.mtu=1450 --scope local --driver bridge docker_gwbridge
+# docker swarm init
+# docker network rm dms-swarm-network
+# docker network create --opt com.docker.network.driver.mtu=1450 --scope swarm --driver overlay --attachable dms-swarm-network
+- name: Fix MTU problem on OpenStack part one
+  block:
+    - name: Extract bridge net MTU
+      shell: docker network inspect docker_gwbridge |jq -r '.[0].Options."com.docker.network.driver.mtu"'
+      register: bridge_net_mtu
+      ignore_errors: true
+  
+    - name: Recreate bridge net with correct MTU
+      shell: "docker network rm docker_gwbridge ; docker network create --opt com.docker.network.driver.mtu={{network_mtu}} --scope local --driver bridge docker_gwbridge"
+      when: bridge_net_mtu.stdout != "1450"
+  when: network_mtu is not undefined
+
+- name: Check swarm state
+  command: "docker info --format {%raw%} '{{.Swarm.LocalNodeState}}' {%endraw%}"
+  register: swarm_status
+
+- name: Initialise swarm network
+  command: docker swarm init
+  when: swarm_status.stdout != "active"
+
+- name: Fix MTU problem on OpenStack part two
+  block:
+    - name: Extract DMS net MTU if it exists
+      shell: docker network inspect dms-swarm-network |jq -r '.[0].Options."com.docker.network.driver.mtu"'
+      register: dms_net_mtu
+      ignore_errors: true
+  
+    - name: Recreate DMS net with correct MTU
+      shell: "docker network rm dms-swarm-network ; docker network create --opt com.docker.network.driver.mtu={{network_mtu}} --scope swarm --driver overlay --attachable dms-swarm-network"
+      when: dms_net_mtu.stdout != "1450"
+  when: network_mtu is not undefined
+
+# This needs further work to template out the DMS config correctly
+# - name: Ensure that DMS config dir exists
+#   file: 
+#     path: "/home/{{ dms_user }}/.dms"
+#     state: directory
+#   become_user: "{{ dms_user }}"
+
+# - name: Install DMS config
+#   template:
+#     src: dms/config.yaml.j2
+#     dest: "/home/{{ dms_user }}/.dms/config.yaml"
+#     owner: "{{ dms_user }}"
+#     group: "{{ dms_user }}"
