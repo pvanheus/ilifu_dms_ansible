@@ -25,7 +25,7 @@
   
     - name: Recreate bridge net with correct MTU
       shell: "docker network rm docker_gwbridge ; docker network create --opt com.docker.network.driver.mtu={{network_mtu}} --scope local --driver bridge docker_gwbridge"
-      when: bridge_net_mtu.stdout != "1450"
+      when: bridge_net_mtu.stdout != "{{network_mtu}}"
   when: network_mtu is not undefined
 
 - name: Check swarm state
@@ -45,7 +45,7 @@
   
     - name: Recreate DMS net with correct MTU
       shell: "docker network rm dms-swarm-network ; docker network create --opt com.docker.network.driver.mtu={{network_mtu}} --scope swarm --driver overlay --attachable dms-swarm-network"
-      when: dms_net_mtu.stdout != "1450"
+      when: dms_net_mtu.stdout != "{{network_mtu}}"
   when: network_mtu is not undefined
 
 # This needs further work to template out the DMS config correctly

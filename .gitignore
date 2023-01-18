@@ -1,5 +1,4 @@
 .vscode
 .vault-password.txt
 templates/dms/config.yaml.j2
-terraform/
 configs/

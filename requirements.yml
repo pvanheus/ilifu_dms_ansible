@@ -6,8 +6,5 @@ roles:
     src: https://github.com/geerlingguy/ansible-role-certbot.git
 
 collections:
-  - name: ansible.posix
-    version: 1.4.0
   - name: community.general
     version: 5.5.0
-  - nginxinc.nginx_core
