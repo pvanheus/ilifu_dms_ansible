@@ -4,6 +4,6 @@ certbot_create_if_missing: true
 certbot_admin_email: pvanheusden@uwc.ac.za
 certbot_certs:
   - domains:
-    - overture.sanbi.ac.za
+    - overture2.sanbi.ac.za
 
 # client_id: 351b537f106f9fc10477
